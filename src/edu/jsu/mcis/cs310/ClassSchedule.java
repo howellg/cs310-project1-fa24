@@ -33,9 +33,81 @@ public class ClassSchedule {
     private final String SUBJECTID_COL_HEADER = "subjectid";
     
     public String convertCsvToJsonString(List<String[]> csv) {
-        
-        return ""; // remove this!
-        
+        JsonObject outerBrackets = new JsonObject();
+        JsonObject scheduleTypeObject = new JsonObject();
+        JsonObject subjectObject = new JsonObject();
+        JsonObject courseObject = new JsonObject();
+        JsonArray sectionArray = new JsonArray();
+
+        try {
+            Iterator<String[]> dataIterator = csv.iterator();
+            dataIterator.next(); //skips the headers
+            //go through each row
+            while (dataIterator.hasNext()) {
+                String[] row = dataIterator.next();
+
+                //get the subject/course
+                String subjectPrefix = row[2].substring(0, row[2].length() - 4);
+                String subjectId = subjectPrefix;
+                String courseNumber = row[2].substring(subjectPrefix.length() + 1);
+
+                int credits = Integer.parseInt(row[6]);
+
+                //populate scheduleType
+                scheduleTypeObject.putIfAbsent(row[5], row[11]);
+
+                //populating subject
+                subjectObject.putIfAbsent(subjectPrefix, row[1]);
+                
+                //populate course object
+                if (!courseObject.containsKey(row[2])) {
+                    JsonObject courseDetails = new JsonObject();
+                    courseDetails.put("subjectid", subjectId);
+                    courseDetails.put("num", courseNumber);
+                    courseDetails.put("description", row[3]);
+                    courseDetails.put("credits", credits);
+                    courseObject.put(row[2], courseDetails);
+                }
+                //populate section details
+                JsonObject sectionDetails = new JsonObject();
+                sectionDetails.put("crn", Integer.valueOf(row[0]));
+                sectionDetails.put("subjectid", subjectId);
+                sectionDetails.put("num", courseNumber);
+                sectionDetails.put("section", row[4]);
+                sectionDetails.put("type", row[5]);
+                sectionDetails.put("start", row[7]);
+                sectionDetails.put("end", row[8]);
+                sectionDetails.put("days", row[9]);
+                sectionDetails.put("where", row[10]);
+
+                //getting instructor list from row
+                JsonArray instructorsArray = new JsonArray();
+                CSVReader instructorReader = new CSVReaderBuilder(new StringReader(row[12]))
+                        .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
+                        .build();
+                List<String[]> instructors = instructorReader.readAll();
+                for (String instructor : instructors.iterator().next()) {
+                    instructorsArray.add(instructor.trim());
+                }
+
+                //attach the instructors
+                sectionDetails.put("instructor", instructorsArray);
+                sectionArray.add(sectionDetails);
+            }
+
+            //populate the outer brackets
+            outerBrackets.put("scheduletype", scheduleTypeObject);
+            outerBrackets.put("subject", subjectObject);
+            outerBrackets.put("course", courseObject);
+            outerBrackets.put("section", sectionArray);
+
+        } catch (Exception e) {
+            System.out.println("Error");
+        }
+
+        return Jsoner.serialize(outerBrackets).trim();
+
+    
     }
     
 	public String convertJsonToCsvString(JsonObject json) {
