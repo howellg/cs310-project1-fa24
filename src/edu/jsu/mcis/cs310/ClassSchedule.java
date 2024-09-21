@@ -57,7 +57,42 @@ public class ClassSchedule {
     	JsonObject courseJson = (JsonObject) json.get("course");
     	JsonArray sectionJson = (JsonArray) json.get("section");
    	 
+    	//for loop to process each section
+    	for (Object obj : sectionJson) {
+        	JsonObject section = (JsonObject) obj;
 
+        	String[] row = new String[13];
+        	String courseKey = section.get("subjectid").toString() + " " + section.get("num").toString();
+        	JsonObject courseDetails = (JsonObject) courseJson.get(courseKey);
+        	JsonArray instructors = (JsonArray) section.get("instructor");
+
+        	//populate the row
+        	row[0] = section.get("crn").toString();
+        	row[1] = subjectJson.get(section.get("subjectid").toString()).toString();
+        	row[2] = courseKey;
+        	row[3] = courseDetails.get("description").toString();
+        	row[4] = section.get("section").toString();
+        	row[5] = section.get("type").toString();
+        	row[6] = courseDetails.get("credits").toString();
+        	row[7] = section.get("start").toString();
+        	row[8] = section.get("end").toString();
+        	row[9] = section.get("days").toString();
+        	row[10] = section.get("where").toString();
+        	row[11] = scheduleTypeJson.get(row[5]).toString();
+
+        	//formatted instructors so you can have multiple
+        	StringBuilder instructorsBuilder = new StringBuilder();
+        	for (int j = 0; j < instructors.size(); j++) {
+        	if (j > 0) {
+               	instructorsBuilder.append(", ");
+        	}
+        	instructorsBuilder.append(instructors.get(j).toString());
+        	}
+        	row[12] = instructorsBuilder.toString();
+
+        	csvData.add(row);
+    	}
+    	return getCsvString(csvData);
     	}
     
     public JsonObject getJson() {
