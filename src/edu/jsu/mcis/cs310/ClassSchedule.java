@@ -38,11 +38,27 @@ public class ClassSchedule {
         
     }
     
-    public String convertJsonToCsvString(JsonObject json) {
-        
-        return ""; // remove this!
-        
-    }
+	public String convertJsonToCsvString(JsonObject json) {
+
+    	List<String[]> csvData = new ArrayList<>();
+
+    	//reteived the headers from the constants and added to a string
+    	String[] headers = {
+        	CRN_COL_HEADER, SUBJECT_COL_HEADER, NUM_COL_HEADER,
+        	DESCRIPTION_COL_HEADER, SECTION_COL_HEADER, TYPE_COL_HEADER,
+        	CREDITS_COL_HEADER, START_COL_HEADER, END_COL_HEADER, DAYS_COL_HEADER,
+        	WHERE_COL_HEADER, SCHEDULE_COL_HEADER, INSTRUCTOR_COL_HEADER
+    	};
+    	csvData.add(headers);
+
+    	//extracted the datga from the json
+    	JsonObject scheduleTypeJson = (JsonObject) json.get("scheduletype");
+    	JsonObject subjectJson = (JsonObject) json.get("subject");
+    	JsonObject courseJson = (JsonObject) json.get("course");
+    	JsonArray sectionJson = (JsonArray) json.get("section");
+   	 
+
+    	}
     
     public JsonObject getJson() {
         
